@@ -1,18 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { dummyOrders } from '../assets/assets';
 
 const MyOrders = () => {
     const [myOrders, setMyOrders] = useState([]);
-    const { currency } = useAppContext();
+    const [loading, setLoading] = useState(true);
+    const { currency, axios } = useAppContext();
 
     const fetchMyOrders = async () => {
-        setMyOrders(dummyOrders);
+        try {
+            setLoading(true);
+            const { data } = await axios.get('/api/order/user');
+            if (data.success && data.orders) {
+                setMyOrders(data.orders);
+            } else {
+                setMyOrders([]);
+            }
+        } catch (error) {
+            setMyOrders([]);
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
         fetchMyOrders();
     }, []);
+
+    if (loading) {
+        return <div className="mt-16 text-center">Loading your orders...</div>;
+    }
 
     return (
         <div className='mt-16 pb-16'>
@@ -20,7 +36,18 @@ const MyOrders = () => {
                 <p className='text-2xl font-medium uppercase'>My orders</p>
                 <div className='w-16 h-0.5 bg-primary rounded-full'></div>
             </div>
-            
+            {myOrders.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-16 text-gray-500">
+                    <div style={{ fontSize: 64, marginBottom: 16 }}>🛒</div>
+                    <div className="mb-4 text-lg">You haven’t placed any orders yet.</div>
+                    <button
+                        onClick={() => window.location.href = '/products'}
+                        className="px-6 py-3 bg-indigo-500 text-white rounded-lg font-medium hover:bg-indigo-600 transition"
+                    >
+                        Shop Now
+                    </button>
+                </div>
+            )}
             {myOrders.map((order, index) => (
                 <div key={index} className='border border-gray-300 rounded-lg mb-10 p-4 py-5 max-w-4xl'>
                     <p className='flex justify-between md:items-center text-gray-400 md:font-medium max-md:flex-col'>

@@ -12,10 +12,13 @@ export const addProduct = async (req, res) => {
                 });
                 return result.secure_url
             })
-        
         )
 
-        await Product.create({...productData, image: imagesUrl})
+        // Get sellerId from req.seller (set by authSeller middleware)
+        const sellerId = req.seller.id;
+        console.log('Adding product with sellerId:', sellerId); // Debug log
+
+        await Product.create({ ...productData, image: imagesUrl, sellerId });
         res.json({success: true, message: 'Product Added'})
     } catch (error) {
         console.log(error.message);

@@ -1,4 +1,6 @@
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
+import User from '../models/User.js';
 
 // Login Seller : /api/seller/login
 export const sellerLogin = async (req, res) => {
@@ -19,7 +21,16 @@ export const sellerLogin = async (req, res) => {
             });
         }
 
-        const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        // Fetch seller's ObjectId from User collection
+        const seller = await User.findOne({ email });
+        if (!seller) {
+            return res.status(404).json({
+                success: false,
+                message: 'Seller not found in users collection'
+            });
+        }
+        const sellerId = seller._id;
+        const token = jwt.sign({ id: sellerId, email }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
         res.cookie('sellerToken', token, {
             httpOnly: true,

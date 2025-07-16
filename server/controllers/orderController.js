@@ -1,6 +1,7 @@
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
 import stripe from "stripe";
+import mongoose from "mongoose";
 
 // Place Order COD : /api/order/cod
 export const placeOrderCOD = async (req, res) => {
@@ -22,8 +23,11 @@ export const placeOrderCOD = async (req, res) => {
         amount += Math.floor(amount * 0.02);
 
         await Order.create({
-            userId,
-            items,
+            userId: new mongoose.Types.ObjectId(userId),
+            items: items.map(item => ({
+                product: new mongoose.Types.ObjectId(item.product),
+                quantity: item.quantity
+            })),
             amount,
             address,
             paymentType: "COD",
@@ -66,8 +70,11 @@ export const placeOrderStripe = async (req, res) => {
 
         // Create order in database
         const order = await Order.create({
-            userId,
-            items,
+            userId: new mongoose.Types.ObjectId(userId),
+            items: items.map(item => ({
+                product: new mongoose.Types.ObjectId(item.product),
+                quantity: item.quantity
+            })),
             amount,
             address,
             paymentType: "ONLINE",
@@ -114,9 +121,9 @@ export const placeOrderStripe = async (req, res) => {
 // Get Orders by User ID : /api/order/user
 export const getUserOrders = async (req, res) => {
     try {
-        const { userId } = req.body;
+        const userId = req.user.id;
         const orders = await Order.find({
-            userId,
+            userId: new mongoose.Types.ObjectId(userId),
             $or: [{ paymentType: "COD" }, { isPaid: true }]
         })
         .populate("items.product address")
@@ -131,12 +138,20 @@ export const getUserOrders = async (req, res) => {
 // Get All Orders (for seller/admin) : /api/order/seller
 export const getAllOrders = async (req, res) => {
     try {
+        const sellerId = req.user.id; // Seller's MongoDB _id from auth middleware
+
+        // Find all products for this seller
+        const sellerProducts = await Product.find({ sellerId: sellerId }).select('_id');
+        const sellerProductIds = sellerProducts.map(p => p._id);
+
+        // Find all orders that include these products
         const orders = await Order.find({
+            'items.product': { $in: sellerProductIds },
             $or: [{ paymentType: "COD" }, { isPaid: true }]
         })
-        .populate("items.product address").sort({createdAt: -1})
+        .populate("items.product address")
         .sort({ createdAt: -1 });
-        
+
         res.json({ success: true, orders });
     } catch (error) {
         res.json({ success: false, message: error.message });

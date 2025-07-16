@@ -15,8 +15,6 @@ const Home = () => {
         <ButtomBanner/>
         <NewsLetter/>
       </section>
-
-      
     </main>
   );
 };

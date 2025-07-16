@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 
 const authSeller = async (req, res, next) => {
+    console.log('authSeller req.cookies:', req.cookies); // Debug log
     const { sellerToken } = req.cookies;
 
     if (!sellerToken) {
@@ -14,6 +15,7 @@ const authSeller = async (req, res, next) => {
         const tokenDecode = jwt.verify(sellerToken, process.env.JWT_SECRET);
         if (tokenDecode.email === process.env.SELLER_EMAIL) {
             req.seller = tokenDecode; // Attach seller info to request
+            req.user = tokenDecode;   // Also set req.user for compatibility
             return next();
         }
         return res.status(403).json({ 

@@ -95,7 +95,7 @@ export const AppContextProvider = ({ children }) => {
     useEffect(() => {
         fetchProducts();
         fetchSeller();
-    }, [fetchProducts, fetchSeller]);
+    }, []); // Only run once on mount
 
     const value = {
         navigate,

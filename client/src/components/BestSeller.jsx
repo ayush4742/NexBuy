@@ -1,13 +1,16 @@
 import React from 'react';
 import ProductCard from './ProductCard';
 import { useAppContext } from '../context/AppContext';
+import { dummyProducts } from '../assets/assets';
 
 const BestSeller = () => {
     const { products } = useAppContext();
     
+    // Use real products if available, otherwise fallback to dummyProducts
+    const sourceProducts = products && products.length > 0 ? products : dummyProducts;
     // Get best-selling products (sorted by sales or rating in a real app)
-    const bestSellers = products
-        ?.sort((a, b) => (b.sales || b.rating) - (a.sales || a.rating))
+    const bestSellers = sourceProducts
+        ?.sort((a, b) => (b.sales || b.rating || 0) - (a.sales || a.rating || 0))
         ?.slice(0, 4); // Show top 4 products
 
     return (

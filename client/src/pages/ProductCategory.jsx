@@ -13,10 +13,14 @@ const ProductCategory = () => {
         item?.path?.toLowerCase() === category?.toLowerCase()
     ) || null;
 
-    // Safely filter products with null checks
-    const filteredProducts = products?.filter((product) => 
-        product?.category?.toLowerCase() === category?.toLowerCase()
-    ) || [];
+    // Safely filter products with null checks and handle category as string or array
+    const filteredProducts = products?.filter((product) => {
+        if (!product?.category) return false;
+        if (Array.isArray(product.category)) {
+            return product.category.map(c => c.toLowerCase()).includes(category.toLowerCase());
+        }
+        return product.category.toLowerCase() === category.toLowerCase();
+    }) || [];
 
     // Loading state if products aren't loaded yet
     if (!products) {

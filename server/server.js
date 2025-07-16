@@ -22,13 +22,14 @@ await connectCloudinary();
 
 // ✅ Define allowed origins (both local and deployed frontend)
 const allowedOrigins = [
-  'http://localhost:5173',
+  'http://localhost:5173', // <-- Update this if your frontend runs on a different URL
   'https://nex-buy-rosy.vercel.app'
 ];
 
 // ✅ CORS middleware with dynamic origin checking
 app.use(cors({
   origin: function (origin, callback) {
+    console.log('CORS request from origin:', origin); // Debug log
     // Allow requests with no origin (like mobile apps or curl)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);

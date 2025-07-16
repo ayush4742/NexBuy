@@ -2,14 +2,14 @@ import { useEffect, useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import { assets, dummyAddress } from "../assets/assets";
 import toast from "react-hot-toast";
-import axios from "axios"; // ✅ Make sure axios is imported
+import axios from "../utils/axios";
 
 const Cart = () => {
     const { products, currency, cartItems, removeFromCart, getCartCount,
         updateCartItem, navigate, getCartAmount, setCartItems, user, setShowUserLogin } = useAppContext();
 
     const [cartArray, setCartArray] = useState([]);
-    const [addresses, setAddresses] = useState(dummyAddress);
+    const [addresses] = useState(dummyAddress);
     const [showAddress, setShowAddress] = useState(false);
     const [selectedAddress, setSelectedAddress] = useState(dummyAddress[0]);
     const [paymentOption, setPaymentOption] = useState("COD");
@@ -27,7 +27,8 @@ const Cart = () => {
     };
 
     // ✅ Order function fixed
-    const placeOrder = async () => {
+    const placeOrder = async (event) => {
+        if (event) event.preventDefault();
         try {
             if (!user) {
                 toast.error("Please login to place order");
