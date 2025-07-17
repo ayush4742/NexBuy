@@ -1,9 +1,10 @@
-import cookieParser from 'cookie-parser'; // Middleware for parsing cookies
-import express from 'express'; // Express framework for building the server
-import cors from 'cors'; // Middleware for enabling CORS (Cross-Origin Resource Sharing)
+import express from 'express';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import 'dotenv/config';
+
 import connectDB from './configs/db.js';
 import connectCloudinary from './configs/cloudinary.js';
-import 'dotenv/config';
 
 import userRouter from './routes/userRoute.js';
 import sellerRouter from './routes/sellerRoute.js';
@@ -12,26 +13,21 @@ import cartRouter from './routes/cartRoute.js';
 import addressRouter from './routes/addressRoute.js';
 import orderRouter from './routes/orderRoute.js';
 
+// Create Express app
 const app = express();
-
-// Set the port number from environment variables or default to 4000
 const port = process.env.PORT || 4000;
 
-// Connect to DB and Cloudinary
-await connectDB();
-await connectCloudinary();
-
-// ✅ Define allowed origins (local + your deployed Vercel frontend)
+// ✅ Define allowed origins
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://nex-buy-ayushs-projects-d19c3e9f.vercel.app'
+  'https://nex-buy-ayushs-projects-d19c3e9f.vercel.app', // optional if used before
+  'https://nex-buy-rosy.vercel.app' // ✅ Your current deployed frontend
 ];
 
-// ✅ CORS middleware with dynamic origin checking
+// ✅ Apply CORS middleware
 app.use(cors({
   origin: function (origin, callback) {
-    console.log('CORS request from origin:', origin); // Debug log
-    // Allow requests with no origin (like mobile apps or curl)
+    console.log('CORS request from origin:', origin); // for debugging
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -41,16 +37,16 @@ app.use(cors({
   credentials: true
 }));
 
-// Middleware setup
-app.use(express.json()); // Parse JSON requests
-app.use(cookieParser()); // Enable cookie parsing
+// ✅ Middleware for parsing
+app.use(express.json());
+app.use(cookieParser());
 
-// Basic test route
+// ✅ Test route
 app.get('/', (req, res) => {
   res.send("API is working");
 });
 
-// API Routes
+// ✅ API routes
 app.use('/api/user', userRouter);
 app.use('/api/seller', sellerRouter);
 app.use('/api/product', productRouter);
@@ -58,7 +54,15 @@ app.use('/api/cart', cartRouter);
 app.use('/api/address', addressRouter);
 app.use('/api/order', orderRouter);
 
-// Start the server
-app.listen(port, () => {
-  console.log(`✅ Server is running on port ${port}`);
-});
+// ✅ Start server inside async function
+(async () => {
+  try {
+    await connectDB();
+    await connectCloudinary();
+    app.listen(port, () => {
+      console.log(`✅ Server is running on port ${port}`);
+    });
+  } catch (err) {
+    console.error('❌ Failed to start server:', err);
+  }
+})();
