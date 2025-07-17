@@ -9,6 +9,8 @@ const Navbar = () => {
   const [searchSuggestions, setSearchSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchRef = useRef(null);
+  const [showMenu, setShowMenu] = useState(false); // Add this line
+  const menuRef = useRef(null); // Add this line
   const { user, setUser, setShowUserLogin, navigate, getCartCount } = useAppContext();
   
   // Sample product categories for demonstration
@@ -24,6 +26,10 @@ const Navbar = () => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setShowSuggestions(false);
+      }
+      // Close profile menu if click outside
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
       }
     };
 
@@ -169,26 +175,29 @@ const Navbar = () => {
             Login
           </button>
         ) : (
-          <div className='relative group'>
+          <div className='relative' ref={menuRef}>
             <img 
               src={assets.profile_icon} 
               className='w-10 h-10 rounded-full object-cover cursor-pointer' 
               alt="User profile" 
+              onClick={() => setShowMenu((prev) => !prev)}
             />
-            <ul className='hidden group-hover:block absolute top-12 right-0 bg-white shadow-lg border border-gray-100 py-2 w-40 rounded-md z-40'>
-              <li 
-                onClick={() => navigate("/my-orders")} 
-                className='px-4 py-2 hover:bg-primary/10 cursor-pointer transition-colors'
-              >
-                My Orders
-              </li>
-              <li 
-                onClick={logout} 
-                className='px-4 py-2 hover:bg-primary/10 cursor-pointer transition-colors text-red-500'
-              >
-                Logout
-              </li>
-            </ul>
+            {showMenu && (
+              <ul className='absolute top-12 right-0 bg-white shadow-lg border border-gray-100 py-2 w-40 rounded-md z-40'>
+                <li 
+                  onClick={() => { setShowMenu(false); navigate("/my-orders"); }} 
+                  className='px-4 py-2 hover:bg-primary/10 cursor-pointer transition-colors'
+                >
+                  My Orders
+                </li>
+                <li 
+                  onClick={() => { setShowMenu(false); logout(); }} 
+                  className='px-4 py-2 hover:bg-primary/10 cursor-pointer transition-colors text-red-500'
+                >
+                  Logout
+                </li>
+              </ul>
+            )}
           </div>
         )}
       </div>

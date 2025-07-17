@@ -4,6 +4,7 @@ import cors from 'cors'; // Middleware for enabling CORS (Cross-Origin Resource 
 import connectDB from './configs/db.js';
 import connectCloudinary from './configs/cloudinary.js';
 import 'dotenv/config';
+
 import userRouter from './routes/userRoute.js';
 import sellerRouter from './routes/sellerRoute.js';
 import productRouter from './routes/productRoute.js';
@@ -20,10 +21,10 @@ const port = process.env.PORT || 4000;
 await connectDB();
 await connectCloudinary();
 
-// ✅ Define allowed origins (both local and deployed frontend)
+// ✅ Define allowed origins (local + your deployed Vercel frontend)
 const allowedOrigins = [
-  'http://localhost:5173', // <-- Update this if your frontend runs on a different URL
-  'https://nex-buy-rosy.vercel.app'
+  'http://localhost:5173',
+  'https://nex-buy-ayushs-projects-d19c3e9f.vercel.app'
 ];
 
 // ✅ CORS middleware with dynamic origin checking
