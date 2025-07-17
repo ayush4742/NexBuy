@@ -1,34 +1,34 @@
 import jwt from 'jsonwebtoken';
 
-const authUser = (req, res, next) => {
-    const { token } = req.cookies;
+const authSeller = async (req, res, next) => {
+    console.log('authSeller req.cookies:', req.cookies); // Debug log
+    const { sellerToken } = req.cookies;
 
-    if (!token) {
+    if (!sellerToken) {
         return res.status(401).json({ 
-            success: false,
-            message: 'Authorization token required' 
+            success: false, 
+            message: 'Not Authorized' 
         });
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = { id: decoded.id }; // Attach user to request object
-        next();
-    } catch (err) {
-        console.error('Authentication error:', err.message);
-        
-        if (err.name === 'TokenExpiredError') {
-            return res.status(401).json({ 
-                success: false,
-                message: 'Session expired, please login again' 
-            });
+        const tokenDecode = jwt.verify(sellerToken, process.env.JWT_SECRET);
+        if (tokenDecode.email === process.env.SELLER_EMAIL) {
+            req.seller = tokenDecode; // Attach seller info to request
+            req.user = tokenDecode;   // Also set req.user for compatibility
+            return next();
         }
-        
+        return res.status(403).json({ 
+            success: false, 
+            message: 'Not Authorized' 
+        });
+    } catch (error) {
+        console.error('Seller auth error:', error.message);
         return res.status(401).json({ 
-            success: false,
-            message: 'Invalid authorization token' 
+            success: false, 
+            message: 'Invalid token' 
         });
     }
 };
 
-export default authUser;
+export default authSeller;
